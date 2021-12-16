@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS
 import json
-from face_rec import FaceRec, rodrigo
+from face_rec import FaceRec, poodyn, chit, nat, sar, nop
 from PIL import Image
 import base64
 import io
@@ -33,8 +33,16 @@ def api():
 				im = Image.open(io.BytesIO(base64.b64decode(image)))
 				im.save(directory+'/stranger.jpeg')
 
-				if rodrigo.recognize_faces() == 'Rodrigo':
-					resp = 'your-name'
+				if poodyn.recognize_faces() == 'Poodyn':
+					resp = 'Poodyn'
+				elif chit.recognize_faces() == 'Chittawan':
+					resp = 'Chittawan'
+				elif nat.recognize_faces() == 'Natdanai':
+					resp = 'Natdanai'
+				elif sar.recognize_faces() == 'Sarayut':
+					resp = 'Sarayut'
+				elif nop.recognize_faces() == 'Nopporn':
+					resp = 'Nopporn'
 				else:
 					resp = 'Nobody'
 			except:

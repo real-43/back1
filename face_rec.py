@@ -49,7 +49,11 @@ class FaceRec:
                     return name
 
 #You can add as much people as you wish
-rodrigo = FaceRec('./known-people/your-image.jpeg', './stranger', 'Rodrigo')
+poodyn = FaceRec('./known-people/Poodyn.jpeg', './stranger', 'Poodyn')
+chit = FaceRec('./known-people/chittawan.jpeg', './stranger', 'Chittawan')
+nat = FaceRec('./known-people/natdanai.jpeg', './stranger', 'Natdanai')
+sar = FaceRec('./known-people/Sarayut.jpeg', './stranger', 'Sarayut')
+nop = FaceRec('./known-people/nopporn.jpeg', './stranger', 'Nopporn')
 
 
 

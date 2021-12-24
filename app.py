@@ -1,8 +1,67 @@
+# import PIL.Image as Image
+# from flask import Flask, request
+# from flask_cors import CORS
+# import json
+# import face_rec as FaceRec
+# import base64
+# import io
+# import os
+# import shutil
+# import time
+
+
+# app = Flask(__name__)
+# CORS(app)
+
+
+# @app.route('/api', methods=['POST', 'GET'])
+# def api():
+# 	data = request.get_json()
+# 	resp = 'Nobody'
+# 	directory = './stranger'
+# 	if data != '':
+# 		if  os.path.exists(directory):
+# 			shutil.rmtree(directory)
+
+# 		if not os.path.exists(directory):
+# 			try:
+# 				os.mkdir(directory)
+# 				time.sleep(1)
+# 				result = data['data']
+# 				b = bytes(result, 'utf-8')
+# 				image = b[b.find(b'/9'):]
+# 				im = Image.open(io.BytesIO(base64.b64decode(image)))
+# 				im.save(directory+'/stranger.jpeg')
+# 				resp = FaceRec.main("stranger/stranger.jpeg")
+# 			except Exception as e:
+# 				print(e)
+# 	return resp
+
+
+	
+
+
+
+
+
+
+
+# if __name__ == '__main__':
+# 	app.run()
+
+
+
+
+
+
+
+
+import PIL.Image as Image
 from flask import Flask, request
 from flask_cors import CORS
 import json
-from face_rec import FaceRec, poodyn, chit, nat, sar, nop
-from PIL import Image
+import face_rec as FaceRec
+import comapare as Comp
 import base64
 import io
 import os
@@ -17,10 +76,10 @@ CORS(app)
 @app.route('/api', methods=['POST', 'GET'])
 def api():
 	data = request.get_json()
-	resp = 'Nobody'
+	resp = []
 	directory = './stranger'
-	if data:
-		if os.path.exists(directory):
+	if data != '':
+		if  os.path.exists(directory):
 			shutil.rmtree(directory)
 
 		if not os.path.exists(directory):
@@ -32,22 +91,18 @@ def api():
 				image = b[b.find(b'/9'):]
 				im = Image.open(io.BytesIO(base64.b64decode(image)))
 				im.save(directory+'/stranger.jpeg')
-
-				if poodyn.recognize_faces() == 'Poodyn':
-					resp = 'Poodyn'
-				elif chit.recognize_faces() == 'Chittawan':
-					resp = 'Chittawan'
-				elif nat.recognize_faces() == 'Natdanai':
-					resp = 'Natdanai'
-				elif sar.recognize_faces() == 'Sarayut':
-					resp = 'Sarayut'
-				elif nop.recognize_faces() == 'Nopporn':
-					resp = 'Nopporn'
-				else:
-					resp = 'Nobody'
-			except:
-				pass
-	return resp
+				matchs = Comp.main("stranger/stranger.jpeg")
+				resp.append(FaceRec.main("stranger/stranger.jpeg"))
+				resp.append(matchs[0])
+				resp.append(matchs[1])
+				print(resp)
+			except Exception as e:
+				print(e)
+	try :
+		ans = f"{resp[0]}_{resp[1][0]}_{resp[2][0]}"
+		return ans
+	except :
+		return "Fail to compare"
 
 
 	

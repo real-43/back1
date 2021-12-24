@@ -1,59 +1,66 @@
-import face_recognition
+import face_recognition as fr
+from face_recognition.api import face_encodings
 import numpy as np
-from PIL import Image, ImageDraw
+import pickle
 import os
-import io
-import base64
-
-class FaceRec:
-
-    def __init__(self, known_person_path_file, unknown_images_path_file, known_name=None):
-        self.known_person_path_file = known_person_path_file
-        self.unknown_images_path_file = unknown_images_path_file
-        self.known_name = known_name 
-
-  
-    def converted_known_image(self):
-        return face_recognition.load_image_file(self.known_person_path_file)
-
-    def recognize_faces(self):
-
-        for file in os.listdir(self.unknown_images_path_file):
-            if file[0] != '.':  
-                known_image = self.converted_known_image()
-                known_image_encoding = face_recognition.face_encodings(known_image)[0]
-                known_face_encodings = [known_image_encoding]
-                known_face_names = [self.known_name]
-
-                
-                unknown_image = face_recognition.load_image_file(self.unknown_images_path_file + '/' + file)
-
-               
-                face_locations = face_recognition.face_locations(unknown_image)
-                face_encodings = face_recognition.face_encodings(unknown_image, face_locations)
+import matplotlib.image as plt
 
 
-                for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-                
-                    matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-                    name = "Nobody"
-                    
-                    face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
-                    best_match_index = np.argmin(face_distances)
+def load_data():
+    file = open("data.pkl", "rb")
+    encoded = pickle.load(file)
+    file.close()
+    return encoded
 
-                    if matches[best_match_index]:
-                        name = known_face_names[best_match_index]
-                    
-                        return name
-                    
-                    return name
+def unknown_image_encoded(img):
+    """
+    encode a face given the file name
+    """
+    face = fr.load_image_file("faces/" + img)
+    encoding = fr.face_encodings(face)[0]
 
-#You can add as much people as you wish
-poodyn = FaceRec('./known-people/Poodyn.jpeg', './stranger', 'Poodyn')
-chit = FaceRec('./known-people/chittawan.jpeg', './stranger', 'Chittawan')
-nat = FaceRec('./known-people/natdanai.jpeg', './stranger', 'Natdanai')
-sar = FaceRec('./known-people/Sarayut.jpeg', './stranger', 'Sarayut')
-nop = FaceRec('./known-people/nopporn.jpeg', './stranger', 'Nopporn')
+    return encoding
 
 
+def main(im):
+    """
+    will find all of the faces in a given image and label
+    them if it knows what they are
+
+    :param im: str of file path
+    :return: list of face names
+    """
+    print("Start")
+    faces = load_data()
+    faces_encoded = list(faces.values())
+    known_face_names = list(faces.keys())
+
+    print("Reading image")
+    img = plt.imread(im)
+    # img = cv2.imread(im, 1)
+    #img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
+    #img = img[:,:,::-1]
+    face_locations = fr.face_locations(img)
+    unknown_face_encodings = fr.face_encodings(img, face_locations)
+    width = int(img.shape[1] * 50 / 100)
+    height = int(img.shape[0] * 50 / 100)
+    dim = (width, height)
+
+    print("Recognition")
+    face_names = []
+    for face_encoding in unknown_face_encodings:
+        # See if the face is a match for the known face(s)
+
+        matches = fr.compare_faces(faces_encoded, face_encoding)
+        name = "Unknown"
+
+        # use the known face with the smallest distance to the new face
+        face_distances = fr.face_distance(faces_encoded, face_encoding)
+        best_match_index = np.argmin(face_distances)
+        if matches[best_match_index]:
+            name = known_face_names[best_match_index]
+
+        face_names.append(name)
+
+    return name
 
